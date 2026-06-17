@@ -72,11 +72,14 @@ app.post("/webhook/plans-carousel", async (req, res) => {
 
     const elements = plans.map((plan) => ({
       title: plan.name,
-      subtitle: `${plan.price}\n${plan.description}`,
+      subtitle: [
+        plan.price,
+        ...plan.features
+      ].join("\n"),
       buttons: [
         {
           type: "url",
-          text: plan.button_text || "View plan",
+          text: plan.button_text,
           value: plan.url
         }
       ]
