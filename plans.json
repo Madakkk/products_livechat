@@ -1,0 +1,26 @@
+[
+  {
+    "name": "Starter",
+    "price": "$20 per agent/month",
+    "description": "For small teams that want to start chatting with customers.",
+    "url": "https://www.livechat.com/pricing/"
+  },
+  {
+    "name": "Team",
+    "price": "$41 per agent/month",
+    "description": "For support teams that need better collaboration and reporting.",
+    "url": "https://www.livechat.com/pricing/"
+  },
+  {
+    "name": "Business",
+    "price": "$59 per agent/month",
+    "description": "For teams that need advanced tools, staffing prediction, and reporting.",
+    "url": "https://www.livechat.com/pricing/"
+  },
+  {
+    "name": "Enterprise",
+    "price": "Custom pricing",
+    "description": "For larger organizations that need dedicated support, security, and custom terms.",
+    "url": "https://www.livechat.com/pricing/"
+  }
+]
