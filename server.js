@@ -6,34 +6,8 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 
-const TEXT_CLIENT_ID = process.env.TEXT_CLIENT_ID;
-const TEXT_CLIENT_SECRET = process.env.TEXT_CLIENT_SECRET;
+const TEXT_BASIC_AUTH = process.env.TEXT_BASIC_AUTH;
 const TEXT_AGENT_ID = process.env.TEXT_AGENT_ID;
-
-async function getAccessToken() {
-  const credentials = Buffer.from(
-    `${TEXT_CLIENT_ID}:${TEXT_CLIENT_SECRET}`
-  ).toString("base64");
-
-  const response = await fetch("https://accounts.livechat.com/token", {
-    method: "POST",
-    headers: {
-      Authorization: `Basic ${credentials}`,
-      "Content-Type": "application/x-www-form-urlencoded"
-    },
-    body: new URLSearchParams({
-      grant_type: "client_credentials"
-    })
-  });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(`Token request failed: ${JSON.stringify(data)}`);
-  }
-
-  return data.access_token;
-}
 
 app.get("/", (req, res) => {
   res.json({
@@ -42,21 +16,23 @@ app.get("/", (req, res) => {
   });
 });
 
+app.get("/debug", (req, res) => {
+  res.json({
+    hasBasicAuth: Boolean(TEXT_BASIC_AUTH),
+    basicAuthLength: TEXT_BASIC_AUTH?.length || 0,
+    hasAgentId: Boolean(TEXT_AGENT_ID),
+    agentId: TEXT_AGENT_ID || null
+  });
+});
+
 app.post("/webhook/plans-carousel", async (req, res) => {
   try {
     const { chat_id, thread_id } = req.body;
 
-    if (!TEXT_CLIENT_ID) {
+    if (!TEXT_BASIC_AUTH) {
       return res.status(500).json({
         ok: false,
-        error: "Missing TEXT_CLIENT_ID environment variable"
-      });
-    }
-
-    if (!TEXT_CLIENT_SECRET) {
-      return res.status(500).json({
-        ok: false,
-        error: "Missing TEXT_CLIENT_SECRET environment variable"
+        error: "Missing TEXT_BASIC_AUTH environment variable"
       });
     }
 
@@ -74,7 +50,6 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       });
     }
 
-    const accessToken = await getAccessToken();
     const plans = JSON.parse(fs.readFileSync("./plans.json", "utf8"));
 
     const addAgentResponse = await fetch(
@@ -82,7 +57,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Basic ${TEXT_BASIC_AUTH}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -128,7 +103,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${accessToken}`,
+          Authorization: `Basic ${TEXT_BASIC_AUTH}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
