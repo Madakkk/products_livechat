@@ -5,8 +5,35 @@ const app = express();
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
-const TEXT_ACCESS_TOKEN = process.env.TEXT_ACCESS_TOKEN;
+
+const TEXT_CLIENT_ID = process.env.TEXT_CLIENT_ID;
+const TEXT_CLIENT_SECRET = process.env.TEXT_CLIENT_SECRET;
 const TEXT_AGENT_ID = process.env.TEXT_AGENT_ID;
+
+async function getAccessToken() {
+  const credentials = Buffer.from(
+    `${TEXT_CLIENT_ID}:${TEXT_CLIENT_SECRET}`
+  ).toString("base64");
+
+  const response = await fetch("https://accounts.livechat.com/token", {
+    method: "POST",
+    headers: {
+      Authorization: `Basic ${credentials}`,
+      "Content-Type": "application/x-www-form-urlencoded"
+    },
+    body: new URLSearchParams({
+      grant_type: "client_credentials"
+    })
+  });
+
+  const data = await response.json();
+
+  if (!response.ok) {
+    throw new Error(`Token request failed: ${JSON.stringify(data)}`);
+  }
+
+  return data.access_token;
+}
 
 app.get("/", (req, res) => {
   res.json({
@@ -19,10 +46,17 @@ app.post("/webhook/plans-carousel", async (req, res) => {
   try {
     const { chat_id, thread_id } = req.body;
 
-    if (!TEXT_ACCESS_TOKEN) {
+    if (!TEXT_CLIENT_ID) {
       return res.status(500).json({
         ok: false,
-        error: "Missing TEXT_ACCESS_TOKEN environment variable"
+        error: "Missing TEXT_CLIENT_ID environment variable"
+      });
+    }
+
+    if (!TEXT_CLIENT_SECRET) {
+      return res.status(500).json({
+        ok: false,
+        error: "Missing TEXT_CLIENT_SECRET environment variable"
       });
     }
 
@@ -40,6 +74,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       });
     }
 
+    const accessToken = await getAccessToken();
     const plans = JSON.parse(fs.readFileSync("./plans.json", "utf8"));
 
     const addAgentResponse = await fetch(
@@ -47,7 +82,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Basic ${TEXT_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
@@ -72,10 +107,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
 
     const elements = plans.map((plan) => ({
       title: plan.name,
-      subtitle: [
-        plan.price,
-        ...plan.features
-      ].join("\n"),
+      subtitle: [plan.price, ...plan.features].join("\n"),
       buttons: [
         {
           type: "url",
@@ -96,7 +128,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${TEXT_ACCESS_TOKEN}`,
+          Authorization: `Bearer ${accessToken}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
