@@ -1,26 +1,38 @@
 [
   {
-    "name": "Starter",
-    "price": "$20 per agent/month",
-    "description": "For small teams that want to start chatting with customers.",
-    "url": "https://www.livechat.com/pricing/"
+    "id": "growth",
+    "name": "Growth",
+    "price": "$79/user/month",
+    "features": [
+      "10 AI Agents",
+      "200 AI resolutions",
+      "Chat supervision and takeover"
+    ],
+    "button_text": "Start free trial",
+    "url": "https://www.text.com/pricing/"
   },
   {
-    "name": "Team",
-    "price": "$41 per agent/month",
-    "description": "For support teams that need better collaboration and reporting.",
-    "url": "https://www.livechat.com/pricing/"
+    "id": "essential",
+    "name": "Essential",
+    "price": "$19/user/month",
+    "features": [
+      "1 AI Agent",
+      "10 AI resolutions",
+      "10 custom skills"
+    ],
+    "button_text": "Start free trial",
+    "url": "https://www.text.com/pricing/"
   },
   {
-    "name": "Business",
-    "price": "$59 per agent/month",
-    "description": "For teams that need advanced tools, staffing prediction, and reporting.",
-    "url": "https://www.livechat.com/pricing/"
-  },
-  {
+    "id": "enterprise",
     "name": "Enterprise",
-    "price": "Custom pricing",
-    "description": "For larger organizations that need dedicated support, security, and custom terms.",
-    "url": "https://www.livechat.com/pricing/"
+    "price": "Custom offer",
+    "features": [
+      "Custom AI Agents",
+      "Dedicated onboarding",
+      "SSO and audit logs"
+    ],
+    "button_text": "Contact Expert",
+    "url": "https://www.text.com/pricing/"
   }
 ]
