@@ -47,7 +47,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       {
         method: "POST",
         headers: {
-          Authorization: `Bearer ${TEXT_ACCESS_TOKEN}`,
+          Authorization: `Basic ${TEXT_ACCESS_TOKEN}`,
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
