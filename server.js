@@ -6,6 +6,14 @@ app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
 const TEXT_ACCESS_TOKEN = process.env.TEXT_ACCESS_TOKEN;
+const TEXT_AGENT_ID = process.env.TEXT_AGENT_ID;
+
+app.get("/", (req, res) => {
+  res.json({
+    ok: true,
+    service: "Text plans carousel webhook"
+  });
+});
 
 app.post("/webhook/plans-carousel", async (req, res) => {
   try {
@@ -18,6 +26,13 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       });
     }
 
+    if (!TEXT_AGENT_ID) {
+      return res.status(500).json({
+        ok: false,
+        error: "Missing TEXT_AGENT_ID environment variable"
+      });
+    }
+
     if (!chat_id || !thread_id) {
       return res.status(400).json({
         ok: false,
@@ -27,13 +42,41 @@ app.post("/webhook/plans-carousel", async (req, res) => {
 
     const plans = JSON.parse(fs.readFileSync("./plans.json", "utf8"));
 
+    const addAgentResponse = await fetch(
+      "https://api.livechatinc.com/v3.5/agent/action/add_user_to_chat",
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${TEXT_ACCESS_TOKEN}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          chat_id,
+          user_id: TEXT_AGENT_ID,
+          user_type: "agent",
+          visibility: "all",
+          ignore_requester_presence: true
+        })
+      }
+    );
+
+    const addAgentData = await addAgentResponse.json();
+
+    if (!addAgentResponse.ok) {
+      return res.status(addAgentResponse.status).json({
+        ok: false,
+        step: "add_user_to_chat",
+        error: addAgentData
+      });
+    }
+
     const elements = plans.map((plan) => ({
       title: plan.name,
       subtitle: `${plan.price}\n${plan.description}`,
       buttons: [
         {
           type: "url",
-          text: "View plan",
+          text: plan.button_text || "View plan",
           value: plan.url
         }
       ]
@@ -45,7 +88,7 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       elements
     };
 
-    const response = await fetch(
+    const sendEventResponse = await fetch(
       "https://api.livechatinc.com/v3.5/agent/action/send_event",
       {
         method: "POST",
@@ -62,11 +105,21 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       }
     );
 
-    const data = await response.json();
+    const sendEventData = await sendEventResponse.json();
 
-    return res.status(response.ok ? 200 : response.status).json({
-      ok: response.ok,
-      result: data
+    if (!sendEventResponse.ok) {
+      return res.status(sendEventResponse.status).json({
+        ok: false,
+        step: "send_event",
+        error: sendEventData
+      });
+    }
+
+    return res.json({
+      ok: true,
+      step: "completed",
+      add_user_to_chat: addAgentData,
+      send_event: sendEventData
     });
   } catch (error) {
     return res.status(500).json({
@@ -74,13 +127,6 @@ app.post("/webhook/plans-carousel", async (req, res) => {
       error: error.message
     });
   }
-});
-
-app.get("/", (req, res) => {
-  res.json({
-    ok: true,
-    service: "Text plans carousel webhook"
-  });
 });
 
 app.listen(PORT, () => {
