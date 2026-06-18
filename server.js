@@ -4,71 +4,71 @@ const app = express();
 
 app.use(express.json());
 
-const plans = [
-  {
-    regular_price: "99",
-    title: "Growth",
-    price: "79",
-    id: "growth",
-    currency: "USD",
-    url: "https://www.text.com/pricing/",
-    image_url: "https://placehold.co/300x160?text=Growth",
-    buttons: [
-      {
-        text: "Tell me more",
-        type: "postback",
-        postback_id: "plan_growth",
-        button_value: "growth"
-      }
-    ]
-  },
-  {
-    regular_price: "25",
-    title: "Essential",
-    price: "19",
-    id: "essential",
-    currency: "USD",
-    url: "https://www.text.com/pricing/",
-    image_url: "https://placehold.co/300x160?text=Essential",
-    buttons: [
-      {
-        text: "Tell me more",
-        type: "postback",
-        postback_id: "plan_essential",
-        button_value: "essential"
-      }
-    ]
-  },
-  {
-    regular_price: "",
-    title: "Enterprise",
-    price: "Custom",
-    id: "enterprise",
-    currency: "USD",
-    url: "https://www.text.com/pricing/",
-    image_url: "https://placehold.co/300x160?text=Enterprise",
-    buttons: [
-      {
-        text: "Learn more",
-        type: "postback",
-        postback_id: "contact_sales",
-        button_value: "contact sales"
-      }
-    ]
-  }
-];
+const richMessage = {
+  type: "rich_message",
+  visibility: "all",
+  template_id: "cards",
+  elements: [
+    {
+      title: "Growth",
+      subtitle: "$79/month billed annually, or $99 monthly",
+      image: {
+        url: "https://placehold.co/300x160?text=Growth",
+        alternative_text: "Growth plan"
+      },
+      buttons: [
+        {
+          type: "url",
+          text: "Tell me more",
+          value: "https://www.text.com/pricing/",
+          target: "new"
+        }
+      ]
+    },
+    {
+      title: "Essential",
+      subtitle: "$19/month billed annually, or $25 monthly",
+      image: {
+        url: "https://placehold.co/300x160?text=Essential",
+        alternative_text: "Essential plan"
+      },
+      buttons: [
+        {
+          type: "url",
+          text: "Tell me more",
+          value: "https://www.text.com/pricing/",
+          target: "new"
+        }
+      ]
+    },
+    {
+      title: "Enterprise",
+      subtitle: "Custom offer for larger teams",
+      image: {
+        url: "https://placehold.co/300x160?text=Enterprise",
+        alternative_text: "Enterprise plan"
+      },
+      buttons: [
+        {
+          type: "url",
+          text: "Learn more",
+          value: "https://www.text.com/pricing/",
+          target: "new"
+        }
+      ]
+    }
+  ]
+};
 
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
-    message: "Text Plans API"
+    message: "Text Plans Rich Message API"
   });
 });
 
 app.get("/plans", (req, res) => {
-  res.json({
-    products: plans
-  });
+  res.json(richMessage);
 });
 
 const PORT = process.env.PORT || 3000;
