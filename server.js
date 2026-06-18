@@ -4,71 +4,42 @@ const app = express();
 
 app.use(express.json());
 
-const richMessage = {
-  type: "rich_message",
-  visibility: "all",
-  template_id: "cards",
-  elements: [
-    {
-      title: "Growth",
-      subtitle: "$79/month billed annually, or $99 monthly",
-      image: {
-        url: "https://placehold.co/300x160?text=Growth",
-        alternative_text: "Growth plan"
-      },
-      buttons: [
-        {
-          type: "url",
-          text: "Tell me more",
-          value: "https://www.text.com/pricing/",
-          target: "new"
-        }
-      ]
-    },
-    {
-      title: "Essential",
-      subtitle: "$19/month billed annually, or $25 monthly",
-      image: {
-        url: "https://placehold.co/300x160?text=Essential",
-        alternative_text: "Essential plan"
-      },
-      buttons: [
-        {
-          type: "url",
-          text: "Tell me more",
-          value: "https://www.text.com/pricing/",
-          target: "new"
-        }
-      ]
-    },
-    {
-      title: "Enterprise",
-      subtitle: "Custom offer for larger teams",
-      image: {
-        url: "https://placehold.co/300x160?text=Enterprise",
-        alternative_text: "Enterprise plan"
-      },
-      buttons: [
-        {
-          type: "url",
-          text: "Learn more",
-          value: "https://www.text.com/pricing/",
-          target: "new"
-        }
-      ]
-    }
-  ]
-};
-
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
-    message: "Text Plans Rich Message API"
+    message: "Text Plans API"
   });
 });
 
 app.get("/plans", (req, res) => {
-  res.json(richMessage);
+  res.json({
+    products: [
+      {
+        regular_price: "99",
+        title: "Growth",
+        price: "79",
+        id: "growth",
+        currency: "USD",
+        url: "https://www.text.com/pricing/",
+      },
+      {
+        regular_price: "25",
+        title: "Essential",
+        price: "19",
+        id: "essential",
+        currency: "USD",
+        url: "https://www.text.com/pricing/",
+      },
+      {
+        regular_price: "",
+        title: "Enterprise",
+        price: "Custom",
+        id: "enterprise",
+        currency: "USD",
+        url: "https://www.text.com/pricing/",
+      }
+    ]
+  });
 });
 
 const PORT = process.env.PORT || 3000;
